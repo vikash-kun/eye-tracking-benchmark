@@ -62,4 +62,31 @@ def calculate_precision(gaze_points):
         x_std ** 2 + y_std ** 2
     )
 
-    return precision    
+    return precision   
+def calculate_trial_result(
+    target_x,
+    target_y,
+    gaze_x,
+    gaze_y
+):
+    """
+    Calculate metrics for a single benchmark trial.
+
+    Returns:
+        dict: target and gaze coordinates with spatial error.
+    """
+
+    spatial_error = calculate_spatial_error(
+        target_x,
+        target_y,
+        gaze_x,
+        gaze_y
+    )
+
+    return {
+        "target_x": target_x,
+        "target_y": target_y,
+        "gaze_x": gaze_x,
+        "gaze_y": gaze_y,
+        "spatial_error": spatial_error
+    } 

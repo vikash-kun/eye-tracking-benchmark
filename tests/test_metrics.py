@@ -1,6 +1,7 @@
 from src.metrics import (
     calculate_spatial_error,
-    calculate_precision
+    calculate_precision,
+    calculate_trial_result
 )
 
 
@@ -48,3 +49,14 @@ def test_precision_empty_input():
     precision = calculate_precision([])
 
     assert precision == 0.0    
+def test_trial_result():
+    result = calculate_trial_result(
+        500, 350,
+        503, 354
+    )
+
+    assert result["target_x"] == 500
+    assert result["target_y"] == 350
+    assert result["gaze_x"] == 503
+    assert result["gaze_y"] == 354
+    assert result["spatial_error"] == 5    

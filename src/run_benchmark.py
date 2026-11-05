@@ -1,5 +1,5 @@
-from src.gaze import generate_gaze_point
-from src.metrics import calculate_trial_result
+from src.samples import generate_gaze_samples
+from src.trial import summarize_target
 
 
 TARGETS = [
@@ -11,36 +11,62 @@ TARGETS = [
 ]
 
 
-def run_benchmark():
+def run_benchmark(n_samples=60, noise=10, loss_rate=0.05, seed=None):
+    """
+    Run the benchmark with many gaze samples per target.
+
+    Returns:
+        list: one summary dict per target
+    """
+
     results = []
 
     for target_id, (target_x, target_y) in enumerate(
         TARGETS,
         start=1
     ):
-        gaze = generate_gaze_point(
+        target_seed = None if seed is None else seed + target_id
+
+        samples = generate_gaze_samples(
             target_x,
             target_y,
-            noise=10
+            n_samples=n_samples,
+            noise=noise,
+            loss_rate=loss_rate,
+            seed=target_seed
         )
 
-        result = calculate_trial_result(
-            target_x,
-            target_y,
-            gaze.x,
-            gaze.y
+        results.append(
+            summarize_target(
+                target_id,
+                target_x,
+                target_y,
+                samples
+            )
         )
-
-        result["target_id"] = target_id
-        result["timestamp"] = gaze.timestamp
-
-        results.append(result)
 
     return results
 
 
-if __name__ == "__main__":
-    results = run_benchmark()
+def format_result(result):
+    """Turn one result dict into a readable line."""
 
-    for result in results:
-        print(result)
+    accuracy = result["accuracy_px"]
+    precision = result["precision_px"]
+
+    accuracy_text = "n/a" if accuracy is None else f"{accuracy:.2f}px"
+    precision_text = "n/a" if precision is None else f"{precision:.2f}px"
+
+    return (
+        f"Target {result['target_id']} "
+        f"({result['target_x']}, {result['target_y']}): "
+        f"accuracy={accuracy_text} "
+        f"precision={precision_text} "
+        f"data_loss={result['data_loss']:.1%} "
+        f"valid={result['n_valid']}/{result['n_samples']}"
+    )
+
+
+if __name__ == "__main__":
+    for result in run_benchmark():
+        print(format_result(result))

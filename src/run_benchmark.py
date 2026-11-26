@@ -1,3 +1,4 @@
+from src.angle import DEFAULT_SETUP, add_visual_angles
 from src.samples import generate_gaze_samples
 from src.trial import summarize_target
 
@@ -11,9 +12,18 @@ TARGETS = [
 ]
 
 
-def run_benchmark(n_samples=60, noise=10, loss_rate=0.05, seed=None):
+def run_benchmark(
+    n_samples=60,
+    noise=10,
+    loss_rate=0.05,
+    seed=None,
+    setup=DEFAULT_SETUP
+):
     """
     Run the benchmark with many gaze samples per target.
+
+    Accuracy and precision are reported in pixels and in degrees
+    of visual angle, using the screen setup given.
 
     Returns:
         list: one summary dict per target
@@ -36,32 +46,49 @@ def run_benchmark(n_samples=60, noise=10, loss_rate=0.05, seed=None):
             seed=target_seed
         )
 
-        results.append(
-            summarize_target(
-                target_id,
-                target_x,
-                target_y,
-                samples
-            )
+        summary = summarize_target(
+            target_id,
+            target_x,
+            target_y,
+            samples
         )
 
+        results.append(add_visual_angles(summary, setup))
+
     return results
+
+
+def format_value(pixels, degrees):
+    """Show a value in pixels and, when known, in degrees."""
+
+    if pixels is None:
+        return "n/a"
+
+    text = f"{pixels:.2f}px"
+
+    if degrees is not None:
+        text += f" ({degrees:.2f} deg)"
+
+    return text
 
 
 def format_result(result):
     """Turn one result dict into a readable line."""
 
-    accuracy = result["accuracy_px"]
-    precision = result["precision_px"]
-
-    accuracy_text = "n/a" if accuracy is None else f"{accuracy:.2f}px"
-    precision_text = "n/a" if precision is None else f"{precision:.2f}px"
+    accuracy = format_value(
+        result["accuracy_px"],
+        result.get("accuracy_deg")
+    )
+    precision = format_value(
+        result["precision_px"],
+        result.get("precision_deg")
+    )
 
     return (
         f"Target {result['target_id']} "
         f"({result['target_x']}, {result['target_y']}): "
-        f"accuracy={accuracy_text} "
-        f"precision={precision_text} "
+        f"accuracy={accuracy} "
+        f"precision={precision} "
         f"data_loss={result['data_loss']:.1%} "
         f"valid={result['n_valid']}/{result['n_samples']}"
     )

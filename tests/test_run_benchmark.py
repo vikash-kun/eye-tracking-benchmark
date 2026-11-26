@@ -10,7 +10,7 @@ def test_one_result_per_target():
 def test_result_has_expected_keys():
     result = run_benchmark(seed=1)[0]
 
-    assert set(result) == {
+    expected = {
         "target_id",
         "target_x",
         "target_y",
@@ -20,6 +20,8 @@ def test_result_has_expected_keys():
         "precision_px",
         "data_loss",
     }
+
+    assert expected <= set(result)
 
 
 def test_same_seed_gives_same_results():

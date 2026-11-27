@@ -40,7 +40,28 @@ Run the tests:
 
 ```
 python -m pytest
+
 ```
+## Using recorded gaze data
+
+The benchmark can summarize gaze data recorded from a real device. Save the recording as a CSV file with one row per gaze sample and these columns:
+
+| Column | Meaning |
+|---|---|
+| target_id | Which target was on screen |
+| target_x, target_y | Target position on screen, in pixels |
+| gaze_x, gaze_y | Gaze position reported by the device, in pixels |
+| timestamp_ms | Optional sample time in milliseconds (not used yet) |
+
+If the device did not return a gaze point for a sample, leave gaze_x and gaze_y empty. That sample counts as lost.
+
+Summarize a recording:
+
+```
+python -c "from src.loader import summarize_csv; from src.run_benchmark import format_result; [print(format_result(r)) for r in summarize_csv('examples/simulated_webcam.csv')]"
+```
+
+The `examples/` folder holds two simulated recordings. They are generated test data, not measurements from real devices.
 
 ## Metrics
 

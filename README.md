@@ -62,7 +62,25 @@ python -c "from src.loader import summarize_csv; from src.run_benchmark import f
 ```
 
 The `examples/` folder holds two simulated recordings. They are generated test data, not measurements from real devices.
+## Comparing devices
 
+Put one gaze recording per device in a folder, using the CSV format above. The file name becomes the device name. Then run:
+
+```
+python -m src.report examples
+```
+
+Without a folder name it uses `examples/`. The command prints one row per device:
+
+```
+           device  n_targets  n_samples  accuracy_px  accuracy_deg  precision_px  precision_deg data_loss
+simulated_tracker          5        300        13.01          0.22         12.74           0.22      0.7%
+ simulated_webcam          5        300        68.69          1.18         63.71           1.09     10.3%
+```
+
+It also writes `comparison.csv` and `comparison.json` (one row per device) and `per_target.csv` and `per_target.json` (one row per device and target) into the `data/` folder. The JSON files record the screen setup that was used for the degree values.
+
+For each device, accuracy and precision are the mean of its per-target values, so every target counts equally. Data loss is the share of all samples that were lost.
 ## Metrics
 
 - Accuracy: the mean distance between the valid gaze samples and the target. Lower is better.
